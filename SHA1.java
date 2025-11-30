@@ -1,40 +1,16 @@
-import java.security.MessageDigest;
+import java.security.*;
+import java.util.*;
 
-public class SHA1 {
+class SHA1Demo {
+    public static void main(String[] args) throws Exception {
+        Scanner sc = new Scanner(System.in);
+        String msg = sc.nextLine();                 // input text
 
-    public static void main(String[] args) {
-        try {
-            // Create MessageDigest object for SHA-1
-            MessageDigest md = MessageDigest.getInstance("SHA1");
+        MessageDigest md = MessageDigest.getInstance("SHA-1");
+        byte[] digest = md.digest(msg.getBytes());
 
-            // Print the algorithm and provider details (optional)
-            System.out.println("Algorithm: " + md.getAlgorithm());
-            System.out.println("Provider: " + md.getProvider());
-
-   
-
-            // Example 2: Hash of string "abc"
-            String input = "abc";
-            byte[] output = md.digest(input.getBytes());
-            System.out.println("SHA1(\"abc\") = " + bytesToHex(output));
-
-
-        } catch (Exception e) {
-            System.out.println("Error: " + e.getMessage());
-        }
-    }
-
-    // Helper method to convert byte array to hex string
-    private static String bytesToHex(byte[] bytes) {
-        char[] hexDigits = "0123456789ABCDEF".toCharArray();
-        StringBuilder hexString = new StringBuilder();
-        
-        // Convert each byte to hex and append to the hex string
-        for (byte b : bytes) {
-            hexString.append(hexDigits[(b >> 4) & 0x0F]);
-            hexString.append(hexDigits[b & 0x0F]);
-        }
-        
-        return hexString.toString();
+        StringBuilder hex = new StringBuilder();
+        for (byte b : digest) hex.append(String.format("%02x", b));
+        System.out.println("SHA-1: " + hex.toString());
     }
 }
