@@ -1,32 +1,24 @@
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.PrivateKey;
-import java.security.Signature;
-import java.util.Scanner;
+import java.security.*;
+import java.util.*;
 
-public class CreatingDigitalSignature {
-    public static void main(String args[]) throws Exception {
+class DSSDemo {
+    public static void main(String[] args) throws Exception {
         Scanner sc = new Scanner(System.in);
-        System.out.println("Enter some text:");
         String msg = sc.nextLine();
-        sc.close();
 
-        // Generate a key pair
-        KeyPairGenerator keyPairGen = KeyPairGenerator.getInstance("DSA");
-        keyPairGen.initialize(2048); // Set key size
-        KeyPair pair = keyPairGen.generateKeyPair();
-        PrivateKey privKey = pair.getPrivate();
+        KeyPair kp = KeyPairGenerator.getInstance("DSA").generateKeyPair();
+        Signature s = Signature.getInstance("SHA1withDSA");
 
-        // Initialize the signature object
-        Signature sign = Signature.getInstance("SHA256withDSA");
-        sign.initSign(privKey);
+        s.initSign(kp.getPrivate());
+        s.update(msg.getBytes());
+        byte[] sig = s.sign();
 
-        // Generate the digital signature
-        byte[] bytes = msg.getBytes(); // Convert message to bytes
-        sign.update(bytes);           // Add data to the signature object
-        byte[] signature = sign.sign(); // Generate the signature
+        System.out.println("Signature:");
+        for (byte b : sig) System.out.printf("%02x", b);
+        System.out.println();
 
-        System.out.println("Digital signature for the given text:");
-        System.out.println(new String(signature, "UTF-8")); // Display signature in UTF-8 format
+        s.initVerify(kp.getPublic());
+        s.update(msg.getBytes());
+        System.out.println("Verified: " + s.verify(sig));
     }
 }
