@@ -1,90 +1,95 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>RSA Encryption</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RSA Algorithm</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body>
-    <center>
-        <h1>RSA Algorithm</h1>
-        <h2>Using HTML & JavaScript</h2>
-        <hr>
-        <table>
-            <tr>
-                <td>First Prime (p):</td>
-                <td><input type="number" id="p" value="53"></td>
-            </tr>
-            <tr>
-                <td>Second Prime (q):</td>
-                <td><input type="number" id="q" value="59"></td>
-            </tr>
-            <tr>
-                <td>Message (Plaintext):</td>
-                <td><input type="number" id="msg" value="89"></td>
-            </tr>
-            <tr>
-                <td>Public Key (n):</td>
-                <td><span id="publicKey"></span></td>
-            </tr>
-            <tr>
-                <td>Public Exponent (e):</td>
-                <td><span id="publicExponent"></span></td>
-            </tr>
-            <tr>
-                <td>Private Key (d):</td>
-                <td><span id="privateKey"></span></td>
-            </tr>
-            <tr>
-                <td>Encrypted Message (Ciphertext):</td>
-                <td><span id="ciphertext"></span></td>
-            </tr>
-            <tr>
-                <td><button onclick="performRSA()">Run RSA</button></td>
-            </tr>
-        </table>
-    </center>
+<center>
+  <h2>RSA Algorithm using HTML & JavaScript</h2>
+  <table>
+    <tr>
+      <td>Prime p:</td>
+      <td><input type="number" id="p" value="53"></td>
+    </tr>
+    <tr>
+      <td>Prime q:</td>
+      <td><input type="number" id="q" value="59"></td>
+    </tr>
+    <tr>
+      <td>Plaintext (m &lt; n):</td>
+      <td><input type="number" id="m" value="89"></td>
+    </tr>
+    <tr>
+      <td>n = p × q:</td>
+      <td><span id="n"></span></td>
+    </tr>
+    <tr>
+      <td>φ(n):</td>
+      <td><span id="phi"></span></td>
+    </tr>
+    <tr>
+      <td>Public exponent e:</td>
+      <td><span id="e"></span></td>
+    </tr>
+    <tr>
+      <td>Private key d:</td>
+      <td><span id="d"></span></td>
+    </tr>
+    <tr>
+      <td>Ciphertext (c):</td>
+      <td><span id="c"></span></td>
+    </tr>
+    <tr>
+      <td>Decrypted m:</td>
+      <td><span id="dec"></span></td>
+    </tr>
+    <tr>
+      <td colspan="2" style="text-align:center;">
+        <button onclick="rsa()">Run RSA</button>
+      </td>
+    </tr>
+  </table>
+</center>
 
-    <script>
-        function performRSA() {
-            // Helper function to calculate GCD
-            function gcd(a, b) {
-                return b === 0 ? a : gcd(b, a % b);
-            }
+<script>
+  function gcd(a, b) {
+    return b === 0 ? a : gcd(b, a % b);
+  }
 
-            // Retrieve inputs
-            const p = parseInt(document.getElementById('p').value);
-            const q = parseInt(document.getElementById('q').value);
-            const plaintext = parseInt(document.getElementById('msg').value);
+  // very simple (slow but easy) modular exponentiation
+  function powMod(base, exp, mod) {
+    let r = 1;
+    for (let i = 0; i < exp; i++) r = (r * base) % mod;
+    return r;
+  }
 
-            // RSA calculations
-            const n = p * q;                 // Public key (n)
-            const totient = (p - 1) * (q - 1); // Totient (φ)
+  function rsa() {
+    const p = parseInt(document.getElementById("p").value);
+    const q = parseInt(document.getElementById("q").value);
+    const m = parseInt(document.getElementById("m").value);
 
-            // Find a suitable public exponent e
-            let e;
-            for (e = 2; e < totient; e++) {
-                if (gcd(e, totient) === 1) break;
-            }
+    const n = p * q;
+    const phi = (p - 1) * (q - 1);
 
-            // Calculate private key d (modular multiplicative inverse of e)
-            let d;
-            for (let k = 1; ; k++) {
-                const candidate = 1 + k * totient;
-                if (candidate % e === 0) {
-                    d = candidate / e;
-                    break;
-                }
-            }
+    // choose smallest e that is coprime with phi
+    let e = 2;
+    while (e < phi && gcd(e, phi) !== 1) e++;
 
-            // Encrypt the message
-            const ciphertext = Math.pow(plaintext, e) % n;
+    // find d such that (d * e) % phi == 1
+    let d = 1;
+    while ((d * e) % phi !== 1) d++;
 
-            // Display results
-            document.getElementById('publicKey').innerText = n;
-            document.getElementById('publicExponent').innerText = e;
-            document.getElementById('privateKey').innerText = d;
-            document.getElementById('ciphertext').innerText = ciphertext;
-        }
-    </script>
+    const c = powMod(m, e, n);   // encryption: c = m^e mod n
+    const dec = powMod(c, d, n); // decryption: m = c^d mod n
+
+    document.getElementById("n").textContent = n;
+    document.getElementById("phi").textContent = phi;
+    document.getElementById("e").textContent = e;
+    document.getElementById("d").textContent = d;
+    document.getElementById("c").textContent = c;
+    document.getElementById("dec").textContent = dec;
+  }
+</script>
 </body>
 </html>
